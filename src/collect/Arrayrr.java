@@ -1,17 +1,29 @@
 package collect;
 
+
+
 import java.util.*;
 
 public class Arrayrr <T>implements Iterable <T>, List<T> {
     int capasity;
     T [] value;
     int lenghtM;
-    static final int UVELMAS=2;
+     final int UVELMAS=2;
+final double zaolnCapas=0.8;
 
 
+public Arrayrr(T [] temp){
 
+    value= temp;
 
-
+    lenghtM=temp.length;
+    if (lenghtM*2<16) capasity=16; else capasity=lenghtM*2 ;
+}
+public Arrayrr(Collection <T> e){
+    T [] value= (T[])e.toArray();
+    lenghtM=e.size();
+    capasity=lenghtM*2;
+}
     public Arrayrr(int capasity) {
         this.capasity = capasity;
         this.value=(T[])new Object[capasity];
@@ -22,9 +34,18 @@ public class Arrayrr <T>implements Iterable <T>, List<T> {
         this(16);
     }
 
-
-
-
+    private void uvel(int dlina) {
+        T[] temp;
+        if (dlina / capasity >zaolnCapas){
+            capasity = capasity *UVELMAS;
+            temp= (T[])new Object[capasity];
+            System.arraycopy(value,0,temp,0, lenghtM);
+            value=temp;
+        }
+    }
+    private boolean sravn(T t,Object o){
+        return ((t!=null&&t.equals(o))||(t==null&&o==null));
+    }
     @Override
     public Iterator<T> iterator() {
         return new Iteratorr<T>();
@@ -37,110 +58,87 @@ public class Arrayrr <T>implements Iterable <T>, List<T> {
     public boolean isEmpty() {
         return (lenghtM ==0);
     }
-
     @Override
     public boolean contains(Object o) {
         for (T pereb:value){
 
-                if (sravn(pereb,o)) return true;
+            if (sravn(pereb,o)) return true;
 
 
         }
         return false;
     }
-
     @Override
     public T[] toArray() {
         T [] temp=(T[])new Object [lenghtM];
         System.arraycopy(value,0,temp,0, lenghtM);
         return temp;
     }
-
     @Override
-    public Object[] toArray(Object[] a) {
-        return new Object[0];
+    public T remove(int index) {
+        T temp=value[index];
+        System.arraycopy(value,index+1,value,index,(lenghtM--) -index);
+        return temp;
     }
-
     @Override
     public boolean add(T o) {
 
-try{
-    uvel();
-    value[lenghtM++]=o;
 
-}
-   catch (Throwable e)    {return false;}
-return false;
-
+        uvel(lenghtM);
+        value[lenghtM++] = o;
+        return true;
     }
-
     @Override
-    public boolean remove(Object o) {
-        for (int i = 0; i <value.length ; i++) {
-            if ((value[i]!=null&&value[i].equals(o))||(value[i]==null&&o==null)) System.arraycopy(value,i+1,value,i, lenghtM -i);
-            return true;
+    public T set(int index, T element) {
+        T temp=value[index];
+        value[index]=element;
+        return temp;
+    }
+    @Override
+    public String toString() {
+        StringBuilder sb=new StringBuilder("[");
+
+        for (int i = 0; i <lenghtM-1 ; i++) {
+
+            sb.append(value[i]).append(", ");
         }
-        return false;
+        sb.append(value[lenghtM-1]+"]");
+        return new String(sb);
     }
+    public class Iteratorr <T>implements Iterator {
+        int ukaz;
 
-    @Override
-    public boolean containsAll(Collection c) {
-        return false;
+        public Iteratorr() {
+            this.ukaz = -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return ukaz< lenghtM-1;
+        }
+
+        @Override
+        public T next() {
+            return (T) value[++ukaz];
+        }
     }
-
-    @Override
-    public boolean addAll(Collection <? extends T>c) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(int index, Collection c) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll(Collection c) {
-        return false;
-    }
-
-    @Override
-    public boolean retainAll(Collection c) {
-        return false;
-    }
-
     @Override
     public void clear() {
-value=null;
+        value=null;
+        lenghtM=0;
     }
-
     @Override
     public T get(int index) {
         return value[index];
     }
-
     @Override
-    public Object set(int index, Object element) {
-        return null;
-    }
-
-    @Override
-    public void add(int index, T element) {
-        uvel();
-System.arraycopy(value,index,value,index+1, lenghtM -index);
-try {
-    value[index]=(T)element;
-}
-catch (IllegalArgumentException e){}
-lenghtM++;
-    }
-
-    @Override
-    public T remove(int index) {
-        T temp=value[index];
-        System.arraycopy(value,index+1,value,index,lenghtM-index);
+    public int lastIndexOf(Object o) {
+        int temp=-1;
+        for (int i = 0; i <lenghtM ; i++) {
+            if (sravn(value[i],o)) temp=i;
+        }
         return temp;
     }
-
     @Override
     public int indexOf(Object o) {
         for (int i = 0; i <lenghtM ; i++) {
@@ -152,15 +150,106 @@ lenghtM++;
         }
         return -1;
     }
+    @Override
+    public void add(int index, T element) {
+        uvel(lenghtM);
+        System.arraycopy(value,index,value,index+1, lenghtM -index);
+
+        value[index]=(T)element;
+
+        lenghtM++;
+    }
+    @Override
+    public boolean remove(Object o) {
+
+        for (int i = 0; i <value.length ; i++) {
+            if (sravn(value[i],(T)o)) {
+                System.arraycopy(value,i+1,value,i, lenghtM -i);
+
+                lenghtM--;
+                return true;
+            }}
+        return false;
+    }
+    @Override
+    public boolean addAll(Collection <? extends T>c) {
+        try{
+            addAll(lenghtM,c);
+        }
+        catch (Throwable e){return false;}
+
+        return true;
+    }
+    @Override
+    public boolean addAll(int index, Collection<? extends T> c) {
+        try{
+            uvel(lenghtM+c.size());
+            System.out.println(Arrays.toString(value));
+            System.arraycopy(value,index,value,index+c.size(),lenghtM-index);
+
+            System.out.println(Arrays.toString(value));
+            for (T t: c) {
+                value[index++]=t;
+            }
+            //System.arraycopy(c,0,value,index,c.size()-1);
+            lenghtM=lenghtM+c.size();
+            return true;}
+        catch (Throwable e){
+            return false;}
+    }
+    @Override
+    public Arrayrr<T> subList(int fromIndex, int toIndex) {
+        T [] temp=(T[])new Object[toIndex+1-fromIndex];
+        System.arraycopy(value,fromIndex,temp,0,toIndex+1-fromIndex);
+
+        Arrayrr tempArr=new Arrayrr(temp);
+
+        return tempArr;
+    }
+
+
+
+
 
     @Override
-    public int lastIndexOf(Object o) {
-        int temp=-1;
-        for (int i = 0; i <lenghtM ; i++) {
-            if (sravn(value[i],o)) temp=i;
-        }
-return temp;
+    public Object[] toArray(Object[] a) {
+        return new Object[0];
     }
+
+
+
+
+
+    @Override
+    public boolean containsAll(Collection c) {
+        return false;
+    }
+
+
+
+    @Override
+    public boolean removeAll(Collection c) {
+        return false;
+    }
+
+    @Override
+    public boolean retainAll(Collection c) {
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     public ListIterator listIterator() {
@@ -172,49 +261,10 @@ return temp;
         return null;
     }
 
-    @Override
-    public List subList(int fromIndex, int toIndex) {
-        return null;
-    }
-    private void uvel() {
-        T[] temp;
-        if (lenghtM / capasity >0.8){
-            capasity = capasity *UVELMAS;
-            temp= (T[])new Object[capasity];
-        System.arraycopy(value,0,temp,0, lenghtM);
-        value=temp;
-    }
-}
-private boolean sravn(T t,Object o){
-        return ((t!=null&&t.equals(o))||(t==null&&o==null));
-}
 
-    @Override
-    public String toString() {
-        StringBuilder sb=new StringBuilder("[");
 
-        for (int i = 0; i <lenghtM-1 ; i++) {
-            sb.append(value[i]).append(", ");
-        }
-        sb.append(value[lenghtM-1]+"]");
-        return new String(sb);
-    }
 
-    public class Iteratorr <T>implements Iterator {
-int ukaz;
 
-        public Iteratorr() {
-            this.ukaz = 0;
-        }
 
-        @Override
-        public boolean hasNext() {
-             return ukaz< lenghtM;
-        }
 
-        @Override
-        public T next() {
-            return (T) value[++ukaz];
-        }
-    }
 }

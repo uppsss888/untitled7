@@ -11,16 +11,18 @@ import java.util.List;
 
 public class Zapusk {
     public static void main(String[] args) {
-      List <Integer> yy=new ArrayList<>();
-        for (int i = 0; i <10 ; i++) {
-            yy.add(i);
-        }
-        List <Integer> yy1=new ArrayList<>();
-        for (int i = 16; i <17 ; i++) {
-            yy.add(i);
-        }
-        System.out.println(yy.removeAll(yy1));
-        System.out.println(yy);
+
+
+      List <Integer> yy=new Arrayrr<>();
+
+        yy.add(6);yy.add(6);yy.add(6);yy.add(6);yy.add(6);yy.add(6);yy.add(6);yy.add(6);
+        List <Integer> yy1=new Arrayrr<>();
+
+        yy1.add(6);yy1.add(6);
+        System.out.println(yy+"do");
+        yy.removeAll(yy1);
+
+
         System.out.println(yy1);
     }}
       class Box{
